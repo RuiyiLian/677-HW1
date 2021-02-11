@@ -1,0 +1,84 @@
+---
+title: "HW1"
+author: "Ruiyi"
+date: "2021/2/11"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+From the example, the m==69 is the smallest value for m that thwart a type 1 error, while m=73 is the largest which thwarts a type 2.Therefore, we may choose our critical value between 69 and 73. I will show how we get this value by calculation below.
+
+```{r}
+#Discuss with Haoqi
+#Firstly, I built a binomial model for type1
+n <- 100
+p <- 0.6
+t <- 100-n*p
+m1=rep(0,t)
+p1=rep(0,t)
+for(i in 0:t){
+  m1[i]=i+n*p
+  p1[i]=pbinom(n,n,p)-pbinom(m1[i]-1,n,p)
+}
+a <- data.frame(cbind(m1,p1))
+```
+
+```{r}
+#the significance value is 0.05
+a1 <- a[which(a$p1<0.05),1]
+```
+
+```{r}
+#The minimal value for type 1
+print(min(a1))
+```
+
+```{r}
+#Secondly, I built a binomial model for type1
+n1 <- 100
+p1 <- 0.8
+t1 <- 100-n1*p1
+m2=rep(0,t1)
+p2=rep(0,t1)
+for(i in 0:t1){
+  m2[i]=n1*p1-i
+  p2[i]=pbinom(m2[i]-1,n1,p1)
+}
+b=data.frame(cbind(m2,p2))
+```
+
+```{r}
+#the significance value is 0.05
+b1 <- b[which(b$p2<0.05),1]
+```
+
+```{r,echo=FALSE}
+#The maximum value for type 2
+print(max(b1))
+```
+
+Firgue 3.7
+
+```{r}
+  
+n <- 100
+p <- seq(from=0.4,to=1,by=0.01)
+P_69=cumsum(dbinom(min(a1),n,p))
+P_73=cumsum(dbinom(max(b1),n,p))
+dt_plot=data.frame(p,P_69,P_73)
+ggplot(dt_plot)+
+  geom_rect(aes(xmin = 0.6, xmax = 0.8, ymin = 0.05, ymax = 0.95), alpha = 0.5,color="black", fill=NA)+
+  geom_line(aes(p, P_69),color="black")+
+  geom_line(aes(p, P_73),color="black")+
+  ggtitle("Figure 3.7: The power Curve")   
+
+
+```
+
+
